@@ -873,7 +873,17 @@ def run(
 
         content = "\n".join(lines)
         title = f"🔬 Wyckoff Funnel {date.today().strftime('%Y-%m-%d')}"
-        ok = True if not notify else send_feishu_notification(webhook_url, title, content)
+        push_ok = True if not notify else send_feishu_notification(webhook_url, title, content)
+        if notify and not push_ok:
+            print("[funnel] ⚠️ 飞书推送失败，数据计算已完成")
+        dingtalk_url = os.getenv("DINGTALK_WEBHOOK_URL", "").strip()
+        if dingtalk_url:
+            try:
+                from utils.notify import send_dingtalk_notification
+                send_dingtalk_notification(dingtalk_url, title, content)
+            except Exception as e:
+                print(f"[funnel] 钉钉推送失败: {e}")
+        ok = True
 
         sos_hit_set = set(str(c).strip() for c, _ in triggers.get("sos", []))
         evr_hit_set = set(str(c).strip() for c, _ in triggers.get("evr", []))
@@ -1082,7 +1092,17 @@ def run(
 
     content = "\n".join(lines)
     title = f"🔬 Wyckoff Funnel {date.today().strftime('%Y-%m-%d')}"
-    ok = True if not notify else send_feishu_notification(webhook_url, title, content)
+    push_ok = True if not notify else send_feishu_notification(webhook_url, title, content)
+    if notify and not push_ok:
+        print("[funnel] ⚠️ 飞书推送失败，数据计算已完成")
+    dingtalk_url = os.getenv("DINGTALK_WEBHOOK_URL", "").strip()
+    if dingtalk_url:
+        try:
+            from utils.notify import send_dingtalk_notification
+            send_dingtalk_notification(dingtalk_url, title, content)
+        except Exception as e:
+            print(f"[funnel] 钉钉推送失败: {e}")
+    ok = True
 
     def _selection_source(code: str) -> str:
         if code in hit_set:
